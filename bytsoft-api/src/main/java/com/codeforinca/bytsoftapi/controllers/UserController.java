@@ -3,6 +3,7 @@ package com.codeforinca.bytsoftapi.controllers;
 
 import com.codeforinca.bytsoftapi.services.impl.IUserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,8 +22,8 @@ public class UserController
     private final IUserService userService;
 
     @GetMapping("/test")
-    public ResponseEntity<Object> test(@RequestBody String username){
-        return new ResponseEntity<>(userService.findByUsername(username),OK);
+    public ResponseEntity<Object> test(){
+       return  new ResponseEntity<>("berkcim", HttpStatus.OK);
     }
 
 }

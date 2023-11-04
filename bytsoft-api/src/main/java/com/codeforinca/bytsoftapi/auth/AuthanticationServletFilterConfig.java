@@ -17,6 +17,7 @@ AuthanticationServletFilterConfig
     public void addInterceptors(
             InterceptorRegistry registry
     ) {
-        registry.addInterceptor(new AuthanticationServletFilter()).excludePathPatterns("/auth/**");
+        registry.addInterceptor(new AuthenticationServletFilter())
+                .excludePathPatterns("/auth/**");
     }
 }

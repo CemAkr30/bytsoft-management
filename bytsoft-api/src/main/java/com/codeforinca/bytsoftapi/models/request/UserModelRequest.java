@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Map;
+
 
 @Getter
 @Setter
@@ -21,4 +23,5 @@ public class UserModelRequest
     private String lastName;
     private String phone;
     private Boolean isActive;
+    private Map<String,Object> offlineCaptcha;
 }

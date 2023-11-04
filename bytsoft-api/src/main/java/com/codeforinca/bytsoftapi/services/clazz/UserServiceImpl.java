@@ -8,12 +8,21 @@ import com.codeforinca.bytsoftapi.persistence.entites.User;
 import com.codeforinca.bytsoftapi.persistence.repository.IUserRepository;
 import com.codeforinca.bytsoftapi.services.impl.IUserService;
 import com.codeforinca.bytsoftapi.services.impl.cache.IRedisCacheService;
+import com.codeforinca.bytsoftapi.singletonCache.OfflineCaptchaCache;
 import com.codeforinca.bytsoftcore.utils.AesUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.List;
 
 
 @Service
@@ -25,15 +34,25 @@ public class UserServiceImpl
     private final IUserRepository userRepository;
 
     @Override
-    public Object findByUsername(String username) {
+    public User findByUsername(String username) {
         return userRepository.findByUserName(username);
     }
 
     @Override
-    public ApiResponse findByUserNameAndPassword(String userName, String password) throws Exception {
-        User user = userRepository.findByUserName(userName);
+    public ApiResponse findByEmailAndPassword(String email, String password) throws Exception {
+        List<User> users = userRepository.findAll();
+        User user = null;
+        for (User uFor : users)
+        {
+            if (uFor.getEmail().equals(email))
+            {
+                user = uFor;
+                break;
+            }
+        }
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setStatus(HttpStatus.OK);
+
         if ( user == null )
         {
             apiResponse.setMessage("User not found");
@@ -49,9 +68,133 @@ public class UserServiceImpl
         }
 
         apiResponse.setData(user);
-        apiResponse.setToken(JwtTokenBuilder.generateToken(user.getUserName()));
+        apiResponse.setToken("Bearer " + JwtTokenBuilder.generateToken(user.getUserName()));
 
        return apiResponse;
+    }
+
+    @Override
+    public Map<String, Object> offlineCaptcha() {
+        String uuID = UUID.randomUUID().toString();
+        String isMessage = "";
+        int width = 150;
+        int height = 50;
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2d = image.createGraphics();
+
+        g2d.setColor(Color.WHITE); // Background color
+        g2d.fillRect(0, 0, width, height);
+
+        String captchaText = generateRandomText(6); // 6 character captcha text
+        g2d.setColor(Color.BLACK);
+        //g2d.setStroke(new BasicStroke(2));
+        //g2d.drawRect(0, 0, width - 1, height - 1);
+
+        g2d.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 16));
+        int x = 20;
+        for (int i = 0; i < captchaText.length(); i++)
+        {
+            int y = generateRandomValue(20, height - 10);
+            g2d.drawString(String.valueOf(captchaText.charAt(i)), x, y);
+            x += 20;
+        }
+
+        String currentDirectory = System.getProperty("user.dir"); // Current directory
+        File output = new File(currentDirectory  + File.separator +  "picture");
+        if (!output.exists() || !output.isDirectory())
+        {
+            output.mkdir();
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            processBuilder.redirectErrorStream(true);
+            processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+            processBuilder.command("chmod","755",output.getAbsolutePath() );
+            processBuilder.command("chmod","777",output.getAbsolutePath());
+            try
+            {
+                Process process = processBuilder.start();
+            }
+            catch (IOException e)
+            {
+                isMessage = "Error while creating captcha";
+                return null;
+            }
+        }
+
+        try
+        {
+            String childPath = File.separator + uuID + ".png";
+            File file = new File(output.getAbsolutePath() + childPath);
+            ImageIO.write(image, "png", file);
+            Map<String,Object> obj = new HashMap<>();
+            obj.put("captchaPath",file.getAbsolutePath());
+            obj.put("createDate",new Date());
+            obj.put("captchaText",captchaText);
+            OfflineCaptchaCache.getInstance().put(uuID,obj);
+            byte[] base64ImageBytes = null;
+            try (InputStream inputStream = new FileInputStream(file))
+            {
+                byte[] imageBytes = new byte[(int) file.length()];
+                inputStream.read(imageBytes);
+                base64ImageBytes = Base64.getEncoder().encode(imageBytes);
+            }
+            Map<String,Object> responseMap = new HashMap<>();
+            responseMap.put("uuID",uuID);
+            responseMap.put("captchaBase64","data:image/png;base64," + new String(base64ImageBytes));
+
+            return responseMap;
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        } catch (Exception e)
+        {
+           e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    public Object checkOfflineCaptcha(Map<String, Object> args) {
+        String uuID = String.valueOf(args.get("uuID"));
+        String textCode = String.valueOf(args.get("textCode"));
+
+        Map<String, Object> objectMap = (Map<String, Object>) OfflineCaptchaCache.getInstance().get(uuID);
+        if (objectMap != null) {
+            String captchaText = String.valueOf(objectMap.get("captchaText"));
+            if (captchaText != null && textCode.equals(captchaText)) {
+                OfflineCaptchaCache.getInstance().remove(uuID);
+                String currentDirectory = System.getProperty("user.dir"); // Geçerli dizin
+                File output = new File(currentDirectory + File.separator + "picture" + File.separator + uuID + ".png");
+                if (output.exists() && output.delete()) {
+                    return "{\"status\":\"true\"}";
+                }
+            }
+        }
+
+        return "{\"status\":\"false\"}";
+    }
+
+
+    private static int generateRandomValue(int min, int max)
+    {
+        Random rand = new Random();
+        return rand.nextInt(max - min + 1) + min;
+    }
+
+    private static String generateRandomText(int length)
+    {
+        final String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        Random random = new Random();
+        StringBuilder captchaText = new StringBuilder();
+
+        for (int i = 0; i < length; i++)
+        {
+            int index = random.nextInt(characters.length());
+            captchaText.append(characters.charAt(index));
+        }
+
+        return captchaText.toString();
     }
 
 
