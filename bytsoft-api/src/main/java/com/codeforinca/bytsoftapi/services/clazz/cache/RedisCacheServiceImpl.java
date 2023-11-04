@@ -1,28 +1,37 @@
 package com.codeforinca.bytsoftapi.services.clazz.cache;
 
 import com.codeforinca.bytsoftapi.services.impl.cache.IRedisCacheService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 
 @Service
+@RequiredArgsConstructor
 public class RedisCacheServiceImpl
     implements IRedisCacheService
 {
     private final RedisTemplate<String, Object> redisTemplate;
 
-    public RedisCacheServiceImpl(RedisTemplate<String, Object> redisTemplate) {
-        this.redisTemplate = redisTemplate;
+    @PostConstruct
+    public void init() {
+        Map<String, Object> initialData = new HashMap<>();
+        initialData.put("your_key", "your_value");
+        this.set("#tokens", initialData);
     }
+
 
     @Override
     public void set(
             String key,
             Object value
     ){
-        redisTemplate.opsForValue().set(key, value);
+       redisTemplate.opsForValue().set(key, value);
     }
 
     @Override

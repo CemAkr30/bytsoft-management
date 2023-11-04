@@ -13,8 +13,33 @@ import org.springframework.http.HttpStatus;
 @Setter
 public class ApiResponse
 {
+
+    public ApiResponse(
+            String message,
+            Object data,
+            HttpStatus status
+    ){
+        this.message = message;
+        this.data = data;
+        this.status = status;
+    }
+    public ApiResponse(
+            String message,
+            Object data
+    ){
+        this.message = message;
+        this.data = data;
+    }
+
+    public ApiResponse(
+            String message
+    ){
+        this.message = message;
+    }
+
     private String message;
     private Object data;
     private HttpStatus status;
     private String token;
+
 }

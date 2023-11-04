@@ -3,6 +3,7 @@ package com.codeforinca.bytsoftapi.bootstrap;
 
 import com.codeforinca.bytsoftapi.persistence.entites.User;
 import com.codeforinca.bytsoftapi.persistence.repository.IUserRepository;
+import com.codeforinca.bytsoftcore.utils.AesUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -23,12 +24,12 @@ public class DataLoader
     }
     @Transactional
     @Override
-    public void run(String... args) {
+    public void run(String... args) throws Exception {
         log.info("Loading data...");
         loadUsers();
     }
 
-    private void loadUsers() {
+    private void loadUsers() throws Exception {
         List<User> list = userRepository.findAll();
         for (User user: list)
         {
@@ -37,7 +38,7 @@ public class DataLoader
         }
         User user = new User();
         user.setUserName("admin");
-        user.setPassword("admin");
+        user.setPassword(AesUtils.encrypt("admin"));
         user.setEmail("admin@forinca.com");
         user.setFirstName("admin");
         user.setLastName("admin");

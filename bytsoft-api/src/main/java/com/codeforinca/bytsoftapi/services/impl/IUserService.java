@@ -1,7 +1,6 @@
 package com.codeforinca.bytsoftapi.services.impl;
 
 
-import com.codeforinca.bytsoftapi.models.request.UserModelRequest;
 import com.codeforinca.bytsoftapi.models.response.ApiResponse;
 
 public interface IUserService
@@ -10,8 +9,8 @@ public interface IUserService
         String username
     );
 
-    ApiResponse login(
-       UserModelRequest userModelRequest
-    );
+    ApiResponse findByUserNameAndPassword(
+        String userName,String password
+    ) throws Exception;
 }
 
