@@ -1,5 +1,6 @@
 package com.codeforinca.bytsoftcore.core.implemantations.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 public

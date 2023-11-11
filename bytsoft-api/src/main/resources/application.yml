@@ -5,3 +5,4 @@ spring:
             - redis
 server:
   port: 9090
+

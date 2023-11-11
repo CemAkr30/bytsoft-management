@@ -52,7 +52,6 @@ AuthController
         if (response.getStatus() == HttpStatus.OK)
         {
             Object responseMap =  userService.checkOfflineCaptcha(offlineCaptchaMap);
-            ObjectMapper objectMapper = new ObjectMapper();
             if (responseMap.toString().contains("true")) {
                 // save token to redis
                 User user = (User) response.getData();

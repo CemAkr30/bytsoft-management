@@ -26,7 +26,7 @@ public class AuthenticationServletFilter implements HandlerInterceptor {
             Object handler
     ) throws Exception {
         response.addHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-        response.addHeader("Access-Control-Allow-Origin", "http://192.168.217.197:3000");
+        response.addHeader("Access-Control-Allow-Origin", "http://192.168.38.11:3000");
         response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
         response.addHeader("Access-Control-Allow-Headers", "*");
         response.addHeader("Access-Control-Allow-Credentials", "true");

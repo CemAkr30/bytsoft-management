@@ -1,6 +1,7 @@
 package com.codeforinca.bytsoftapi.services.impl;
 
 
+import com.codeforinca.bytsoftapi.models.request.UserModelRequest;
 import com.codeforinca.bytsoftapi.models.response.ApiResponse;
 import com.codeforinca.bytsoftapi.persistence.entites.User;
 
@@ -23,6 +24,10 @@ public interface IUserService
 
     Object checkOfflineCaptcha(
             Map<String,Object> args
+    );
+
+    UserModelRequest authorizationModuls(
+            String userName
     );
 
 }

@@ -1,6 +1,7 @@
 package com.codeforinca.bytsoftapi.exceptions;
 
 import com.codeforinca.bytsoftapi.exceptions.base.ApiException;
+import com.codeforinca.bytsoftapi.persistence.entites.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -34,5 +35,22 @@ public class GlobalAdviceException {
         );
 
         return new ResponseEntity<>(apiException, HttpStatus.FORBIDDEN);
+    }
+
+
+    @ExceptionHandler(value = {UserException.class})
+    public
+    ResponseEntity<Object>
+            handleUserException(
+                    UserException e
+    ){
+        ApiException apiException = new ApiException(
+                e.getMessage(),
+                e,
+                HttpStatus.FORBIDDEN,
+                ZonedDateTime.now(ZoneId.of("Z"))
+        );
+
+        return new ResponseEntity<>(apiException, HttpStatus.NOT_FOUND);
     }
 }

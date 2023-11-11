@@ -11,15 +11,10 @@
         <module name="bytsoft-core" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="airport-api" target="1.8" />
-      <module name="airport-core" target="1.8" />
-    </bytecodeTargetLevel>
+    <bytecodeTargetLevel target="8" />
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="airport-api" options="-parameters" />
-      <module name="airport-core" options="-parameters" />
       <module name="bytsoft-api" options="-parameters" />
       <module name="bytsoft-core" options="-parameters" />
     </option>

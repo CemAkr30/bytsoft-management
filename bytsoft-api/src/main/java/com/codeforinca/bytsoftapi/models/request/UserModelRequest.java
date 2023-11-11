@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 
 @Getter
@@ -24,4 +26,5 @@ public class UserModelRequest
     private String phone;
     private Boolean isActive;
     private Map<String,Object> offlineCaptcha;
+    private Set<Module> modules = new HashSet<>();
 }

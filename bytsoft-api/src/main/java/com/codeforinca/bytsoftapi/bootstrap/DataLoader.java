@@ -1,15 +1,19 @@
 package com.codeforinca.bytsoftapi.bootstrap;
 
 
+import com.codeforinca.bytsoftapi.persistence.entites.Modul;
 import com.codeforinca.bytsoftapi.persistence.entites.User;
+import com.codeforinca.bytsoftapi.persistence.repository.IModulRepository;
 import com.codeforinca.bytsoftapi.persistence.repository.IUserRepository;
+import com.codeforinca.bytsoftapi.properties.ModulProperty;
 import com.codeforinca.bytsoftcore.utils.AesUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
 @Slf4j
@@ -18,34 +22,93 @@ public class DataLoader
 {
 
     private final IUserRepository userRepository;
+    private final IModulRepository modulRepository;
 
-    public DataLoader(IUserRepository userRepository) {
+    public DataLoader(IUserRepository userRepository, IModulRepository modulRepository) {
         this.userRepository = userRepository;
+        this.modulRepository = modulRepository;
     }
     @Transactional
     @Override
     public void run(String... args) throws Exception {
         log.info("Loading data...");
         loadUsers();
+        loadModuls();
     }
 
-    private void loadUsers() throws Exception {
+    private
+    void
+    loadUsers(
+
+    ) throws Exception {
+        AtomicBoolean isExists = new AtomicBoolean(true);
         List<User> list = userRepository.findAll();
-        for (User user: list)
-        {
-            if (user.getUserName().equals("admin"))
-                return;
-        }
-        User user = new User();
-        user.setUserName("admin");
-        user.setPassword(AesUtils.encrypt("admin"));
-        user.setEmail("admin@forinca.com");
-        user.setFirstName("admin");
-        user.setLastName("admin");
-        user.setPhone("123456789");
-        user.setIsActive(true);
+        list.forEach(
+                user -> {
+                    if(
+                            user.getUserName().equals("admin")
+                    ){
+                        isExists.set(false);
+                    }
+                }
+        );
+        if (
+                isExists.get()
+        ) {
+            User user = new User();
+            user.setUserName("admin");
+            user.setPassword(AesUtils.encrypt("admin"));
+            user.setEmail("admin@forinca.com");
+            user.setFirstName("admin");
+            user.setLastName("admin");
+            user.setPhone("123456789");
+            user.setIsActive(true);
 
-        userRepository.save(user);
+            userRepository.save(user);
+        }
     }
+
+
+    private
+    void
+    loadModuls(
+
+    ) throws Exception {
+         List<Modul> moduls = modulRepository.findAll();
+         List<Map<String,Object>> modulProperties = ModulProperty.modulProperties();
+         List<Long> modulPropIds = new LinkedList<>();
+         moduls.forEach(
+                 mFor -> modulPropIds.add(mFor.getModulPropId())
+         );
+
+         modulProperties
+                 .forEach(
+                         mpFor -> {
+                             Long id = Long.parseLong(mpFor.get("id").toString());
+                             String name = mpFor.get("name").toString();
+
+                             if (
+                                     !modulPropIds.contains(id)
+                             ){
+                                 Modul modul = new Modul();
+                                 modul.setModulPropId(id);
+                                 modul.setDescription(name);
+                                 modul.setName(name);
+
+                                 modulRepository.save(modul);
+                             }
+                         }
+                 );
+
+        User user = userRepository.findByUserName("admin");
+        if (user != null) {
+            Set<Modul> allModuls = new HashSet<>(modulRepository.findAll());
+            Set<Modul> userModuls = user.getModules();
+            allModuls.removeAll(userModuls);
+            userModuls.addAll(allModuls);
+            userRepository.save(user);
+        }
+    }
+
 
 }

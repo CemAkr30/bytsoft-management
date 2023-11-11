@@ -2,6 +2,8 @@ package com.codeforinca.bytsoftapi.services.clazz;
 
 
 import com.codeforinca.bytsoftapi.auth.JwtTokenBuilder;
+import com.codeforinca.bytsoftapi.exceptions.UserException;
+import com.codeforinca.bytsoftapi.models.request.ModulModelRequest;
 import com.codeforinca.bytsoftapi.models.request.UserModelRequest;
 import com.codeforinca.bytsoftapi.models.response.ApiResponse;
 import com.codeforinca.bytsoftapi.persistence.entites.User;
@@ -10,6 +12,7 @@ import com.codeforinca.bytsoftapi.services.impl.IUserService;
 import com.codeforinca.bytsoftapi.services.impl.cache.IRedisCacheService;
 import com.codeforinca.bytsoftapi.singletonCache.OfflineCaptchaCache;
 import com.codeforinca.bytsoftcore.utils.AesUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -173,6 +176,20 @@ public class UserServiceImpl
         }
 
         return "{\"status\":\"false\"}";
+    }
+
+    @Override
+    public UserModelRequest authorizationModuls(String userName) {
+        User user = userRepository.findByUserName(userName);
+        if (
+                user==null
+        ){
+            throw new UserException(
+                    "User not found in database"
+            );
+        }
+
+        return  new ObjectMapper().convertValue(user, UserModelRequest.class);
     }
 
 
