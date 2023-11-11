@@ -16,5 +16,5 @@ public class ModulModelRequest
     // fields
     private String name;
     private String description;
-    private String image;
+    private Long modulPropId;
 }

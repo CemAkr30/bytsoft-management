@@ -3,19 +3,19 @@ package com.codeforinca.bytsoftapi.services.clazz;
 
 import com.codeforinca.bytsoftapi.auth.JwtTokenBuilder;
 import com.codeforinca.bytsoftapi.exceptions.UserException;
-import com.codeforinca.bytsoftapi.models.request.ModulModelRequest;
-import com.codeforinca.bytsoftapi.models.request.UserModelRequest;
 import com.codeforinca.bytsoftapi.models.response.ApiResponse;
+import com.codeforinca.bytsoftapi.persistence.entites.Modul;
 import com.codeforinca.bytsoftapi.persistence.entites.User;
 import com.codeforinca.bytsoftapi.persistence.repository.IUserRepository;
+import com.codeforinca.bytsoftapi.properties.ModulProperty;
 import com.codeforinca.bytsoftapi.services.impl.IUserService;
-import com.codeforinca.bytsoftapi.services.impl.cache.IRedisCacheService;
 import com.codeforinca.bytsoftapi.singletonCache.OfflineCaptchaCache;
 import com.codeforinca.bytsoftcore.utils.AesUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.codeforinca.bytsoftcore.utils.ImageBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -179,8 +180,9 @@ public class UserServiceImpl
         return "{\"status\":\"false\"}";
     }
 
+
     @Override
-    public UserModelRequest authorizationModuls(String userName) {
+    public Object authorizationModuls(String userName) {
         User user = userRepository.findByUserName(userName);
         if (
                 user==null
@@ -190,7 +192,26 @@ public class UserServiceImpl
             );
         }
 
-        return  new ObjectMapper().convertValue(user, UserModelRequest.class);
+        List<Object> moduls = user.getModules().stream()
+                .map(modul -> {
+                    Map<String, Object> modulMap = new HashMap<>();
+                    modulMap.put("id", modul.getId());
+                    modulMap.put("name", modul.getName());
+                    Map<String,Object> map = ModulProperty.findByModulProperty(modul.getModulPropId());
+                    if (map.get("image")!=null)
+                    {
+                        modulMap.put("image", "data:image/png;base64," + ImageBuilder.encodeImage((byte[]) map.get("image")));
+                    }else{
+                        modulMap.put("image", null);
+                    }
+                    modulMap.put("modulPropId", modul.getModulPropId());
+                    modulMap.put("description", modul.getDescription());
+                    return modulMap;
+                })
+                .collect(Collectors.toList());
+
+
+        return  moduls;
     }
 
 

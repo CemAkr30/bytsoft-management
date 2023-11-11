@@ -26,7 +26,7 @@ public interface IUserService
             Map<String,Object> args
     );
 
-    UserModelRequest authorizationModuls(
+    Object authorizationModuls(
             String userName
     );
 

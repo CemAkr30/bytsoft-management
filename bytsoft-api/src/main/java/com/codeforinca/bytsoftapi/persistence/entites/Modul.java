@@ -25,10 +25,8 @@ public class Modul
     @Column
     private String description;
     @Column
-    private String image;
-    @Column
     private Long modulPropId;
     @JsonIgnore // to avoid infinite recursion
-    @ManyToMany(mappedBy = "modules")
+    @ManyToMany(mappedBy = "modules" , fetch = FetchType.EAGER)
     private Set<User> users = new HashSet<>();
 }

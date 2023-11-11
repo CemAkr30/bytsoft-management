@@ -4,7 +4,6 @@ import com.codeforinca.bytsoftapi.exceptions.AuthorizationException;
 import com.codeforinca.bytsoftapi.exceptions.ForbidenException;
 import com.codeforinca.bytsoftapi.persistence.entites.User;
 import com.codeforinca.bytsoftapi.persistence.repository.IUserRepository;
-import com.codeforinca.bytsoftapi.services.impl.cache.IRedisCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,18 +21,13 @@ public class AuthenticationServletFilter
 
     private final IUserRepository userRepository;
 
+
     @Override
     public boolean preHandle(
             HttpServletRequest request,
             HttpServletResponse response,
             Object handler
     ) {
-        response.addHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-        response.addHeader("Access-Control-Allow-Origin", "http://25.64.169.195:3000");
-        response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-        response.addHeader("Access-Control-Allow-Headers", "*");
-        response.addHeader("Access-Control-Allow-Credentials", "true");
-
         String bearer = request.getHeader("Authorization");
 
         if (bearer == null || !bearer.startsWith("Bearer ")) {

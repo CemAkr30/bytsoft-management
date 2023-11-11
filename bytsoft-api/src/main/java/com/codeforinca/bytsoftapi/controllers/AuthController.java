@@ -9,12 +9,10 @@ import com.codeforinca.bytsoftapi.persistence.entites.User;
 import com.codeforinca.bytsoftapi.services.impl.IUserService;
 import com.codeforinca.bytsoftapi.services.impl.cache.IRedisCacheService;
 import lombok.RequiredArgsConstructor;
-import net.projectmonkey.object.mapper.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
@@ -69,6 +67,9 @@ AuthController
                 // save token to redis
                 User user = (User) response.getData();
                 Map<String, Object> tokens = (Map<String, Object>) redisCacheService.get("#tokens");
+                if (tokens == null) {
+                    tokens = new java.util.HashMap<>();
+                }
                 tokens.put(user.getUserName(), response.getToken());
 
                 redisCacheService.set("#tokens", tokens);

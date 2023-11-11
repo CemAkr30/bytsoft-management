@@ -36,7 +36,7 @@ public class User
     private String phone;
     @Column(name = "is_active")
     private Boolean isActive;
-    @ManyToMany(cascade = {CascadeType.ALL})
+    @ManyToMany(cascade = {CascadeType.ALL} , fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_modules",
             joinColumns = {@JoinColumn(name = "user_id")},

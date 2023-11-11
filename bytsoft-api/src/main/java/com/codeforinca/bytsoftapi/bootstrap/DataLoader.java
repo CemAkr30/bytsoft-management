@@ -6,6 +6,7 @@ import com.codeforinca.bytsoftapi.persistence.entites.User;
 import com.codeforinca.bytsoftapi.persistence.repository.IModulRepository;
 import com.codeforinca.bytsoftapi.persistence.repository.IUserRepository;
 import com.codeforinca.bytsoftapi.properties.ModulProperty;
+import com.codeforinca.bytsoftapi.services.impl.cache.IRedisCacheService;
 import com.codeforinca.bytsoftcore.utils.AesUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -24,9 +25,12 @@ public class DataLoader
     private final IUserRepository userRepository;
     private final IModulRepository modulRepository;
 
-    public DataLoader(IUserRepository userRepository, IModulRepository modulRepository) {
+    private final IRedisCacheService redisCacheService;
+
+    public DataLoader(IUserRepository userRepository, IModulRepository modulRepository, IRedisCacheService redisCacheService) {
         this.userRepository = userRepository;
         this.modulRepository = modulRepository;
+        this.redisCacheService = redisCacheService;
     }
     @Transactional
     @Override
@@ -34,6 +38,7 @@ public class DataLoader
         log.info("Loading data...");
         loadUsers();
         loadModuls();
+        clearRedisCache();
     }
 
     private
@@ -86,13 +91,14 @@ public class DataLoader
                          mpFor -> {
                              Long id = Long.parseLong(mpFor.get("id").toString());
                              String name = mpFor.get("name").toString();
+                             String description = mpFor.get("description").toString();
 
                              if (
                                      !modulPropIds.contains(id)
                              ){
                                  Modul modul = new Modul();
                                  modul.setModulPropId(id);
-                                 modul.setDescription(name);
+                                 modul.setDescription(description);
                                  modul.setName(name);
 
                                  modulRepository.save(modul);
@@ -108,6 +114,16 @@ public class DataLoader
             userModuls.addAll(allModuls);
             userRepository.save(user);
         }
+    }
+
+
+
+    private
+    void
+    clearRedisCache(
+
+    ){
+        redisCacheService.delete("#tokens");
     }
 
 
