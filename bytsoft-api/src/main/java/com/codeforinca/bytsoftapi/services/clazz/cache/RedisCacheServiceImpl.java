@@ -20,9 +20,7 @@ public class RedisCacheServiceImpl
 
     @PostConstruct
     public void init() {
-        Map<String, Object> initialData = new HashMap<>();
-        initialData.put("your_key", "your_value");
-        this.set("#tokens", initialData);
+        //
     }
 
 

@@ -2,6 +2,7 @@ package com.codeforinca.bytsoftapi.persistence.entites;
 
 
 import com.codeforinca.bytsoftcore.core.abstractions.entity.AEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,7 +36,6 @@ public class User
     private String phone;
     @Column(name = "is_active")
     private Boolean isActive;
-
     @ManyToMany(cascade = {CascadeType.ALL})
     @JoinTable(
             name = "user_modules",

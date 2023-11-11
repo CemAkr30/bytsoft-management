@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static org.springframework.http.HttpStatus.OK;
 
 
 @RestController
@@ -20,7 +19,7 @@ public class UserController
 
     private final IUserService userService;
 
-    @GetMapping(name = "/authModules")
+    @GetMapping( "/authModules")
     public
     ResponseEntity<ApiResponse>
     authModules(
@@ -30,8 +29,8 @@ public class UserController
                 new ApiResponse(
                         "OK",
                         userService.authorizationModuls(
-                                JwtTokenBuilder.generateToken(
-                                        token
+                                JwtTokenBuilder.getUsernameFromToken(
+                                        token.replace("Bearer ", "")
                                 )
                         )
                 ),

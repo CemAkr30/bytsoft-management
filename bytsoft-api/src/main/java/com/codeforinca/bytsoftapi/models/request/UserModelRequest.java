@@ -1,5 +1,6 @@
 package com.codeforinca.bytsoftapi.models.request;
 
+import com.codeforinca.bytsoftapi.persistence.entites.Modul;
 import com.codeforinca.bytsoftcore.core.abstractions.model.ABaseModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,5 +27,5 @@ public class UserModelRequest
     private String phone;
     private Boolean isActive;
     private Map<String,Object> offlineCaptcha;
-    private Set<Module> modules = new HashSet<>();
+    private Set<Modul> modules = new HashSet<>();
 }

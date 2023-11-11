@@ -2,6 +2,7 @@ package com.codeforinca.bytsoftapi.persistence.entites;
 
 
 import com.codeforinca.bytsoftcore.core.abstractions.entity.AEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,6 +28,7 @@ public class Modul
     private String image;
     @Column
     private Long modulPropId;
+    @JsonIgnore // to avoid infinite recursion
     @ManyToMany(mappedBy = "modules")
     private Set<User> users = new HashSet<>();
 }

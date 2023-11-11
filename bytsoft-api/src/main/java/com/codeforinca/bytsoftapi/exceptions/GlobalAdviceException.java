@@ -9,7 +9,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.time.ZonedDateTime;
 import java.time.ZoneId;
 
-@RestControllerAdvice(basePackages = {"com.codeforinca.bytsoftapi.controllers", "com.codeforinca.bytsoftapi.auth"})
+@RestControllerAdvice(
+        basePackages = {
+                "com.codeforinca.bytsoftapi.controllers",
+                "com.codeforinca.bytsoftapi.auth"
+        }
+     )
 public class GlobalAdviceException {
 
     @ExceptionHandler(value = {AuthorizationException.class})

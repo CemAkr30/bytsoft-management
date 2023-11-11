@@ -40,19 +40,32 @@ AuthController
        String password = userModelRequest.getPassword();
        Map<String,Object> offlineCaptchaMap = userModelRequest.getOfflineCaptcha();
 
-       if (email == null || password == null || offlineCaptchaMap == null)
+       if (
+               email == null ||
+               password == null ||
+               offlineCaptchaMap == null
+       )
        {
            return new ResponseEntity<>(
-                   new ApiResponse("Username or pas sword or textCode is null")
-                   , HttpStatus.BAD_REQUEST
+                   new ApiResponse("Username or pas sword or textCode is null"),
+                   HttpStatus.BAD_REQUEST
            );
        }
 
-        ApiResponse response = userService.findByEmailAndPassword(email, password);
-        if (response.getStatus() == HttpStatus.OK)
-        {
-            Object responseMap =  userService.checkOfflineCaptcha(offlineCaptchaMap);
-            if (responseMap.toString().contains("true")) {
+        ApiResponse response = userService.findByEmailAndPassword(
+                email,
+                password
+        );
+
+        if (
+                response.getStatus() == HttpStatus.OK
+        ) {
+            Object responseMap =  userService.checkOfflineCaptcha(
+                    offlineCaptchaMap
+            );
+            if (
+                    responseMap.toString().contains("true")
+            ) {
                 // save token to redis
                 User user = (User) response.getData();
                 Map<String, Object> tokens = (Map<String, Object>) redisCacheService.get("#tokens");
@@ -60,15 +73,21 @@ AuthController
 
                 redisCacheService.set("#tokens", tokens);
             }else{
-                response.setStatus(HttpStatus.UNAUTHORIZED);
-                response.setMessage("Offline Captcha not okey");
-                response.setToken(null);
-               return  new ResponseEntity<>(response,response.getStatus());
+               return  new ResponseEntity<>(
+                       new ApiResponse(
+                               "Offline Captcha not okey",
+                               HttpStatus.BAD_REQUEST
+                       ),
+                        HttpStatus.BAD_REQUEST
+               );
             }
         }
 
 
-        return new ResponseEntity<>(response, response.getStatus());
+        return new ResponseEntity<>(
+                response,
+                response.getStatus()
+        );
     }
 
 

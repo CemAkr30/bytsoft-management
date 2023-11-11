@@ -72,6 +72,7 @@ public class UserServiceImpl
 
         apiResponse.setData(user);
         apiResponse.setToken("Bearer " + JwtTokenBuilder.generateToken(user.getUserName()));
+        apiResponse.setMessage("Login success");
 
        return apiResponse;
     }

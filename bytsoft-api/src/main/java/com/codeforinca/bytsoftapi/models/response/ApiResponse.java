@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 @Setter
 public class ApiResponse
+        implements java.io.Serializable
 {
 
     public ApiResponse(

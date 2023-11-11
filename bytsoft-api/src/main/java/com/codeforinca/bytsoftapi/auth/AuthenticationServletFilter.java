@@ -3,7 +3,9 @@ package com.codeforinca.bytsoftapi.auth;
 import com.codeforinca.bytsoftapi.exceptions.AuthorizationException;
 import com.codeforinca.bytsoftapi.exceptions.ForbidenException;
 import com.codeforinca.bytsoftapi.persistence.entites.User;
+import com.codeforinca.bytsoftapi.persistence.repository.IUserRepository;
 import com.codeforinca.bytsoftapi.services.impl.cache.IRedisCacheService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -14,19 +16,20 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 @Component
-public class AuthenticationServletFilter implements HandlerInterceptor {
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+public class AuthenticationServletFilter
+        implements HandlerInterceptor {
 
-    @Autowired
-    private IRedisCacheService redisCacheService;
+    private final IUserRepository userRepository;
 
     @Override
     public boolean preHandle(
             HttpServletRequest request,
             HttpServletResponse response,
             Object handler
-    ) throws Exception {
+    ) {
         response.addHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-        response.addHeader("Access-Control-Allow-Origin", "http://192.168.38.11:3000");
+        response.addHeader("Access-Control-Allow-Origin", "http://25.64.169.195:3000");
         response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
         response.addHeader("Access-Control-Allow-Headers", "*");
         response.addHeader("Access-Control-Allow-Credentials", "true");
@@ -37,19 +40,22 @@ public class AuthenticationServletFilter implements HandlerInterceptor {
             throw new AuthorizationException("Authorization token is missing or invalid");
         }
 
-        String token = bearer.substring(7);
-        String userName = JwtTokenBuilder.getUsernameFromToken(token);
-        Map<String, Object> tokens = (Map<String, Object>) redisCacheService.get("#tokens");
-        User user = (User) tokens.get(userName);
+        try {
+            String token = bearer.substring(7);
+            String userName = JwtTokenBuilder.getUsernameFromToken(token);
+            User user = userRepository.findByUserName(userName);
 
-        if (user != null) {
-            if (!(JwtTokenBuilder.validateToken(token) && JwtTokenBuilder.isTokenExpired(token))) {
-                throw new ForbidenException("Forbidden error");
+            if (user != null) {
+                if (!(JwtTokenBuilder.validateToken(token) && !(JwtTokenBuilder.isTokenExpired(token)))) {
+                    throw new ForbidenException("Forbidden error");
+                }
+                return true;
             }
-            return true;
-        }
 
-        return false;
+            throw new AuthorizationException("Authorization token is missing or invalid");
+        }catch (Exception e){
+            throw new AuthorizationException("Authorization token is missing or invalid");
+        }
     }
 
     @Override

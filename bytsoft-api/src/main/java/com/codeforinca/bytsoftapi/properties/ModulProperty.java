@@ -12,7 +12,7 @@ public class ModulProperty {
 
     static {
         modulPropMap = new LinkedList<>();
-        value = 0;
+        value = 1;
         addModul(new HashMap<>(),"Identity Management");
         addModul(new HashMap<>(),"Data Transfer Service");
     }
